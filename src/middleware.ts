@@ -5,13 +5,13 @@ import type { NextRequest } from "next/server";
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  const { userId, sessionClaims } = await auth();
+  const { sessionClaims } = await auth();
 
   if (isProtectedRoute(req)) {
     await auth.protect();
 
-    
-    const role = sessionClaims?.publicMetadata?.role;
+    // ✔️ Safely read role from Public Metadata
+    const role = (sessionClaims?.publicMetadata as { role?: string })?.role;
 
     if (req.nextUrl.pathname.startsWith("/dashboard") && role !== "admin") {
       return NextResponse.redirect(new URL("/", req.url));
