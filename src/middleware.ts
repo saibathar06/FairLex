@@ -2,17 +2,20 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Only protect dashboard routes - articles are now public
 const isProtectedRoute = createRouteMatcher(["/dashboard(.*)"]);
 
 export default clerkMiddleware(async (auth, req: NextRequest) => {
-  const { sessionClaims } = await auth();
+  const { userId, sessionClaims } = await auth();
 
+  // Check if this is a protected route
   if (isProtectedRoute(req)) {
     await auth.protect();
 
-    // ✔️ Safely read role from Public Metadata
-    const role = (sessionClaims?.publicMetadata as { role?: string })?.role;
+    // Get role from Clerk metadata
+    const role = sessionClaims?.metadata?.role;
 
+    // Restrict dashboard to admins only
     if (req.nextUrl.pathname.startsWith("/dashboard") && role !== "admin") {
       return NextResponse.redirect(new URL("/", req.url));
     }
