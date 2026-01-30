@@ -16,6 +16,10 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "FairLex",
   description: "FairLex - Legal Blog WebApp",
+   robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({
